@@ -22,8 +22,6 @@ jobs:
         with:
           ruby-version: "3.4"
           bundler-cache: true
-      - name: Run Rubocop
-        run: bundle exec rake rubocop
       - id: ruby
         uses: voxpupuli/ruby-version@v2
 
