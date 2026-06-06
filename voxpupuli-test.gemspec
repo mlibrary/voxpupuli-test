@@ -31,6 +31,10 @@ Gem::Specification.new do |s|
   # https://github.com/OpenVoxProject/puppet/issues/90
   s.add_dependency 'syslog', '>= 0.3', '< 0.5'
 
+  # Rubocop
+  # has to be compatible with MRI Ruby 3.1 due to OpenVox server 8 using Jruby 9.4
+  s.add_dependency 'rubocop', '< 1.86'
+
   # Linting
   # meta gem to pull in all puppet-lint plugins + puppet-lint itself
   s.add_dependency 'voxpupuli-puppet-lint-plugins', '>= 6.0', '< 8'

@@ -8,7 +8,7 @@ We don't use any of voxpupuli-test's rubocop support, but we depend on standardr
 
 ## Patches
 
-- remove rubocop dependency, so standardrb works
+- remove minimum version in rubocop dependency, so standardrb works
 - disable rubycop rake tasks
 - github actions changes for testing and release
 - add this README
