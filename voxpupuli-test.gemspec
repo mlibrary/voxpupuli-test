@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.description = 'A package that depends on all the gems Vox Pupuli modules need and methods to simplify spec helpers'
   s.licenses    = 'Apache-2.0'
 
-  s.files       = Dir['lib/**/*.rb', 'rubocop.yml', 'LICENSE', 'README.md']
+  s.files       = Dir['lib/**/*.rb', 'LICENSE', 'README.md']
 
   s.required_ruby_version = '>= 2.7.0'
 
@@ -30,12 +30,6 @@ Gem::Specification.new do |s|
   # until Ruby 3.4, syslog was part of MRI ruby core
   # https://github.com/OpenVoxProject/puppet/issues/90
   s.add_dependency 'syslog', '>= 0.3', '< 0.5'
-
-  # Rubocop
-  # has to be compatible with MRI Ruby 3.1 due to OpenVox server 8 using Jruby 9.4
-  s.add_dependency 'rubocop', '~> 1.85.1'
-  s.add_dependency 'rubocop-rake', '~> 0.7.1'
-  s.add_dependency 'rubocop-rspec', '~> 3.9.0'
 
   # Linting
   # meta gem to pull in all puppet-lint plugins + puppet-lint itself
