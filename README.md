@@ -16,7 +16,7 @@ We don't use any of voxpupuli-test's rubocop support, but we depend on standardr
 ## Make a new release
 
 When upstream cuts a new release:
-- If they no longer have a hard conflict w/ standardrb, consider moving back to the upstream gem (keep in mind, this will bring back in some rake tasks we don't use too).
+- If they no longer have a hard conflict w/ standardrb, consider moving back to the upstream gem.
 - Sync fork. Pull a local copy.
 - Create a new branch that matches the latest tag:
   - `git checkout -b release/v99.99.99 v99.99.99`
