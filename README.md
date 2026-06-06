@@ -1,184 +1,33 @@
-# Voxpupuli Test Gem
+# MLibrary fork of Voxpupuli Test Gem
 
-[![License](https://img.shields.io/github/license/voxpupuli/voxpupuli-test.svg)](https://github.com/voxpupuli/voxpupuli-test/blob/master/LICENSE)
-[![Test](https://github.com/voxpupuli/voxpupuli-test/actions/workflows/test.yml/badge.svg)](https://github.com/voxpupuli/voxpupuli-test/actions/workflows/test.yml)
-[![Release](https://github.com/voxpupuli/voxpupuli-test/actions/workflows/release.yml/badge.svg)](https://github.com/voxpupuli/voxpupuli-test/actions/workflows/release.yml)
-[![RubyGem Version](https://img.shields.io/gem/v/voxpupuli-test.svg)](https://rubygems.org/gems/voxpupuli-test)
-[![RubyGem Downloads](https://img.shields.io/gem/dt/voxpupuli-test.svg)](https://rubygems.org/gems/voxpupuli-test)
+## Why?
 
-This is a helper Gem to test the various Vox Pupuli Puppet modules.
-This Gem provides common functionality for rspec-puppet based testing and static code analysis.
-The aim is to reduce the boiler plate and need for modulesync.
+As of this writing, [voxpupuli-test](https://rubygems.org/gems/voxpupuli-test) depends on a version of [rubocop](https://rubygems.org/gems/rubocop/) that is incompatible with any release of [standardrb](https://rubygems.org/gems/standardrb/).
 
-## Usage
+We don't use any of voxpupuli-test's rubocop support, but we depend on standardrb.
 
-Add the `voxpupuli-test` Gem to your `Gemfile`:
+## Patches
 
-```ruby
-gem 'voxpupuli-test'
-```
+- remove rubocop dependency, so standardrb works
+- disable rubycop rake tasks
+- github actions changes for testing and release
+- add this README
 
-Then, at the top of your `Rakefile`, add:
+## Make a new release
 
-```ruby
-require 'voxpupuli/test/rake'
-```
+When upstream cuts a new release:
+- If they no longer have a hard conflict w/ standardrb, consider moving back to the upstream gem (keep in mind, this will bring back in some rake tasks we don't use too).
+- Sync fork. Pull a local copy.
+- Create a new branch that matches the latest tag:
+  - `git checkout -b release/v99.99.99 v99.99.99`
+- List changes between last upstream release tag, and our version:
+  - `git log v14.0.0..v14.0.0-4 --oneline`
+- Re-apply our patches:
+  - `git cherry-pick <list of commit hashes>`
+  - review changes, update as needed (esp. consider any notes to update in this README)
+- `git push`
+- Once CI passes, tag a release, and push your new tag:
+  - `git tag -s v99.99.99-1 -m v99.99.99-1`
+  - `git push origin tag v99.99.99-1`
 
-In your `spec/spec_helper.rb`
-
-```ruby
-require 'voxpupuli/test/spec_helper'
-```
-
-In your `.rubocop.yml` (see [Rubocop's documentation](https://docs.rubocop.org/rubocop/configuration.html#inheriting-configuration-from-a-dependency-gem)).
-
-```yaml
-inherit_gem:
-  voxpupuli-test: rubocop.yml
-```
-
-To run the linter, the syntax checker and the unit tests:
-
-```sh
-bundle exec rake test
-```
-
-To run your all the unit tests:
-
-```sh
-bundle exec rake spec
-```
-
-To run a specific spec test set the `SPEC` variable:
-
-```sh
-SPEC=spec/classes/foo_spec.rb bundle exec rake spec
-```
-
-To run all the static code analysis and linting:
-
-```sh
-bundle exec rake validate lint check rubocop
-```
-
-
-To autocorrect Puppet files:
-
-```sh
-bundle exec rake lint_fix
-```
-
-To autocorrect Ruby files:
-
-```sh
-bundle exec rake rubocop:autocorrect
-```
-
-## Rake tasks
-
-### `check:trailing_whitespace`
-
-The rake task `check:trailing_whitespace` checks for trailing whitespace in all markdown files in the repository.
-It has an exclude pattern for: `%r{^((modules|acceptance|\.?vendor|spec/fixtures|pkg)/|REFERENCE.md)}`
-
-We recommend using the GitHub style guide for markdown files, which includes no trailing whitespace.
-See [GitHub Markdown Style Guide](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax)
-
-### `check:misplaced_files`
-
-The rake task `check:misplaced_files` checks for misplaced files in the repository.
-
-Files are considered misplaced if they don't belong in the directory tree they are under.
-I.e. `functions/`, `manifests/`, and `types/` may only contain `.pp` files, `templates/` may only contain `.erb` and `.epp`, `data/` may only contain `.yml` and `.yaml`, and `lib/` may only contain `.rb`.
-
-### `check:utf8`
-
-The rake task `check:utf8` checks that all files that will be parsed by Puppet are encoded in valid UTF-8 without a BOM.
-
-The task validates all files under `data/`, `functions/`, `lib/`, `manifests/`, `templates/`, and `types/`.
-
-## Environment variables
-
-### `CODECLIMATE_REPORT_FILE`
-
-Setting `CODECLIMATE_REPORT_FILE` to a file path will configure tasks that support it to output CodeClimate-style JSON reports into the given file.
-
-The tasks that currently support this feature include `lint` and `rubocop`.
-
-Note that if multiple tasks all attempt to output CodeClimate reports in a single rake call, then only the final task will be able store its report.
-
-## Fact handling
-
-The recommended method is using [rspec-puppet-facts](https://github.com/mcanevet/rspec-puppet-facts) and is set up by default. This means the tests are writting as follows:
-
-```ruby
-require 'spec_helper'
-
-describe 'myclass' do
-  on_supported_os.each do |os, os_facts|
-    context "on #{os}" do
-      let(:facts) { os_facts }
-
-      it { is_expected.to compile.with_all_deps }
-    end
-  end
-end
-```
-
-Now a common case is to override facts in tests. Let's take the example of SELinux with legacy facts.
-
-```ruby
-require 'spec_helper'
-
-describe 'mytool' do
-  on_supported_os.each do |os, os_facts|
-    context "on #{os}" do
-      let(:facts) { os_facts }
-
-      it { is_expected.to compile.with_all_deps }
-
-      describe 'with SELinux enabled' do
-        let(:facts) { super().merge(selinux: true) }
-
-        it { is_expected.to contain_package('mytool-selinux') }
-      end
-
-      describe 'with SELinux disabled' do
-        let(:facts) { super().merge(selinux: false) }
-
-        it { is_expected.not_to contain_package('mytool-selinux') }
-      end
-    end
-  end
-end
-```
-
-This is all fairly straight forward, but it gets more complex when using modern facts. Modern facts are nested which means you need to do deep merging. There is [deep_merge](https://rubygems.org/gems/deep_merge) but its results are not at all useful for spec testing. That's why voxpupuli-test has an `override_facts` helper.
-
-```ruby
-require 'spec_helper'
-
-describe 'mytool' do
-  on_supported_os.each do |os, os_facts|
-    context "on #{os}" do
-      let(:facts) { os_facts }
-
-      it { is_expected.to compile.with_all_deps }
-
-      describe 'with SELinux enabled' do
-        let(:facts) { override_facts(super(), os: {selinux: {enabled: true}}) }
-
-        it { is_expected.to contain_package('mytool-selinux') }
-      end
-
-      describe 'with SELinux disabled' do
-        let(:facts) { override_facts(super(), os: {selinux: {enabled: false}}) }
-
-        it { is_expected.not_to contain_package('mytool-selinux') }
-      end
-    end
-  end
-end
-```
-
-Note that this helper deals with symbols/strings for you as well.
+Pushing a tag will automatically create a new release. There won't be a gem published, but you can pin to the git tag in your Gemfile.
