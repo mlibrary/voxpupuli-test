@@ -2,9 +2,11 @@
 
 ## Why?
 
-As of this writing, [voxpupuli-test](https://rubygems.org/gems/voxpupuli-test) depends on a version of [rubocop](https://rubygems.org/gems/rubocop/) that is incompatible with any release of [standardrb](https://rubygems.org/gems/standardrb/).
+As of this writing, [voxpupuli-test](https://rubygems.org/gems/voxpupuli-test) depends on [rubocop](https://rubygems.org/gems/rubocop/) 1.85. That version is incompatible with any release of [standardrb](https://rubygems.org/gems/standardrb/).
 
 We don't use any of voxpupuli-test's rubocop support, but we depend on standardrb.
+
+Furthermore, rubocop 1.85 brings in other unnecessary recursive dependencies which we'd like to avoid (removed in 1.86).
 
 ## Patches
 
@@ -15,13 +17,21 @@ We don't use any of voxpupuli-test's rubocop support, but we depend on standardr
 
 ## Make a new release
 
-When upstream cuts a new release:
+- All releases should be on branch named like `release/$UPSTREAM_VERSION`
+- CI will run on every push, as long as your branch matches `release/*`
+
+### New patch release
+Check the patch number of the last release and increment it. Wait for CI to pass, tag a release, and push your new tag:
+- `git tag -s v99.99.99-42 -m v99.99.99-42`
+- `git push origin tag v99.99.99-42`
+
+### Release a patched version of a new upstream release
 - If they no longer have a hard conflict w/ standardrb, consider moving back to the upstream gem.
 - Sync fork. Pull a local copy.
 - Create a new branch that matches the latest tag:
   - `git checkout -b release/v99.99.99 v99.99.99`
-- List changes between last upstream release tag, and our version:
-  - `git log v14.0.0..v14.0.0-4 --oneline`
+- List changes between last upstream release tag, and our current release branch:
+  - `git log v14.0.0..release/v14.0.0 --oneline`
 - Re-apply our patches:
   - `git cherry-pick <list of commit hashes>`
   - review changes, update as needed (esp. consider any notes to update in this README)
